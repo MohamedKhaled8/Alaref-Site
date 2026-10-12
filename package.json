@@ -1,0 +1,12 @@
+{
+  "name": "yala-academy",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix study-buddy-sim run dev",
+    "build": "npm --prefix study-buddy-sim run build",
+    "preview": "npm --prefix study-buddy-sim run preview"
+  },
+  "dependencies": {
+    "firebase": "^12.11.0"
+  }
+}
