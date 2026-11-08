@@ -1,0 +1,154 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Local Verified Waleed Mohsen Educational Fonts */
+@font-face {
+  font-family: 'Amin';
+  src: url('/fonts/Amin-Font-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Amin';
+  src: url('/fonts/Amin-Font-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'VIPHALA';
+  src: url('/fonts/VIPHALA.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Somar';
+  src: url('/fonts/Somar-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'FSAlbert';
+  src: url('/fonts/FS-Albert-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@layer base {
+  :root {
+    /* Exact Waleed Mohsen / Modern Arabic Education Tokens */
+    --primary: #ed6140;           /* Terracotta / Tomato Red */
+    --primary-hover: #d94f30;
+    --primary-border: #ed6140;
+    --primary-btn-color: #ffffff;
+    --primary-saturated: #e94326;
+    
+    --secondary: #facc15;         /* Warm Amber / Gold */
+    --secondary-hover: #eab308;
+    
+    --accent: #ed6140;            /* Coral / Terracotta Red */
+    --accent-hover: #d94f30;
+    
+    --success: #22c55e;           /* Emerald Green */
+    --info: #3b82f6;              /* Sky Blue */
+    --warning: #f59e0b;           /* Amber */
+    --danger: #ef4444;            /* Red */
+    
+    --dark: #1f2937;              /* Deep Slate Text */
+    --black: #0f172a;
+    --white: #ffffff;
+    
+    --gray-100: #faf9f6;          /* Warm Ivory Background */
+    --gray-200: #f3f4f6;          /* Border */
+    --gray-300: #e5e7eb;
+    --gray-400: #9ca3af;
+    --gray-500: #4b5563;          /* Body Text */
+    --gray: #faf9f6;              /* Base Canvas */
+    --section-bg: #f5f3ef;
+
+    --background: 40 20% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 13 82% 59%;
+    --radius: 1rem;
+  }
+
+  .dark {
+    /* Waleed Mohsen Dark Theme Tokens */
+    --primary: #ed6140;
+    --primary-hover: #ff7455;
+    --primary-saturated: #ed6140;
+    --secondary: #facc15;
+    --accent: #ed6140;
+    --success: #4ade80;
+    --info: #60a5fa;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --dark: #f3f4f6;
+    --black: #ffffff;
+    --white: #161926;             /* Card Dark Surface */
+    --gray-100: #1a1e2d;
+    --gray-200: #262b3d;
+    --gray-300: #374151;
+    --gray-400: #6b7280;
+    --gray-500: #9ca3af;
+    --gray: #0c0e17;              /* Main Dark Background */
+    --section-bg: #11141e;
+
+    --background: 233 33% 7%;
+    --foreground: 210 40% 98%;
+    --card: 230 27% 12%;
+    --card-foreground: 210 40% 98%;
+    --border: 228 18% 22%;
+    --input: 228 18% 22%;
+    --ring: 13 82% 59%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+    direction: rtl;
+  }
+
+  body {
+    background-color: var(--gray);
+    color: var(--dark);
+    font-family: 'IBM Plex Sans Arabic', 'Amin', 'Almarai', sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'IBM Plex Sans Arabic', 'Amin', sans-serif;
+    font-weight: 700;
+  }
+}
+
+/* Lenis Smooth Scrolling Styles */
+html.lenis, html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+

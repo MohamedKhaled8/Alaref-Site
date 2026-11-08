@@ -1,0 +1,19 @@
+{
+  "name": "محمود مفلح - منصة الثانوية",
+  "short_name": "مفلح",
+  "description": "منصة محمود مفلح لتدريس الصفوف الثانوية",
+  "dir": "rtl",
+  "lang": "ar",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#3f6212",
+  "icons": [
+    {
+      "src": "/teacher-favicon.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}
