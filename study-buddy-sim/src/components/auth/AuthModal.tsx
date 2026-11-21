@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   X, 
   Smartphone, 
@@ -9,6 +9,8 @@ import {
   GraduationCap
 } from "lucide-react";
 import { gradeStages } from "../../data/mockData";
+import { useAuthStore } from "../../stores/useAuthStore";
+import { authService } from "../../services/authService";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -39,39 +41,61 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   
   // Error state
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Zustand Store
+  const { login, register, isLoading, error: storeError, clearError } = useAuthStore();
+
+  useEffect(() => {
+    setMode(initialMode);
+    setErrorMessage(null);
+    clearError();
+  }, [initialMode, isOpen, clearError]);
 
   if (!isOpen) return null;
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const displayedError = errorMessage || storeError;
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+    clearError();
 
     if (!loginPhone.trim() || !loginPassword.trim()) {
       setErrorMessage("يرجى إدخال رقم الهاتف وكلمة المرور.");
       return;
     }
 
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      onSuccess("طالب مسجل");
+    if (!authService.validateEgyptianPhone(loginPhone.trim())) {
+      setErrorMessage("رقم الهاتف غير صالح. يرجى إدخال رقم هاتف مصري صحيح (11 رقماً يبدأ بـ 01).");
+      return;
+    }
+
+    const success = await login({
+      studentPhone: loginPhone.trim(),
+      password: loginPassword,
+    });
+
+    if (success) {
+      const currentUser = useAuthStore.getState().user;
+      onSuccess(currentUser?.fullName || "طالب مسجل");
       onClose();
-    }, 600);
+    }
   };
 
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+    clearError();
 
     if (!fullName.trim() || !studentPhone.trim() || !parentPhone.trim() || !registerPassword) {
       setErrorMessage("يرجى تعبئة كافة الحقول المطلوبة.");
       return;
     }
 
-    // Exact Verified Rule from El-Ameed: Parent phone must be different from student phone
-    if (studentPhone.trim() === parentPhone.trim()) {
-      setErrorMessage("تنبيه: يجب أن يكون رقم ولي الأمر مختلفاً عن رقم هاتف الطالب لضمان تفعيل الحساب واستلام التقارير.");
+    // Exact Verified Rule: Parent phone must be different from student phone
+    const phoneCheck = authService.validatePhonesDiscrepancy(studentPhone, parentPhone);
+    if (!phoneCheck.valid) {
+      setErrorMessage(phoneCheck.error || "خطأ في أرقام الهواتف المدخلة.");
       return;
     }
 
@@ -85,12 +109,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       return;
     }
 
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      onSuccess(fullName);
+    const success = await register({
+      fullName: fullName.trim(),
+      studentPhone: studentPhone.trim(),
+      parentPhone: parentPhone.trim(),
+      gradeId: selectedGradeId,
+      password: registerPassword,
+    });
+
+    if (success) {
+      const currentUser = useAuthStore.getState().user;
+      onSuccess(currentUser?.fullName || fullName.trim());
       onClose();
-    }, 600);
+    }
   };
 
   return (
@@ -129,6 +160,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             onClick={() => {
               setMode("login");
               setErrorMessage(null);
+              clearError();
             }}
             className={`py-2.5 rounded-12 transition-all ${
               mode === "login"
@@ -143,6 +175,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             onClick={() => {
               setMode("register");
               setErrorMessage(null);
+              clearError();
             }}
             className={`py-2.5 rounded-12 transition-all ${
               mode === "register"
@@ -158,7 +191,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <div className="p-6 sm:p-8 space-y-5">
           
           {/* Single-Device Policy Alert Box (.js-device-limit-alert) */}
-          <div className="p-3.5 rounded-16 bg-[#753b47]/15 border border-[#753b47]/30 flex items-start gap-3 text-xs leading-relaxed">
+          <div className="p-3.5 rounded-16 bg-[#753b47]/15 border border-[#753b47]/30 flex items-start gap-3 text-xs leading-relaxed js-device-limit-alert">
             <ShieldAlert className="w-4 h-4 text-[#fe6257] shrink-0 mt-0.5" />
             <div className="text-white/80">
               <strong className="text-white block font-bold mb-0.5">
@@ -169,9 +202,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
 
           {/* Error Banner */}
-          {errorMessage && (
-            <div className="p-3 rounded-12 bg-red-500/20 border border-red-500/40 text-red-200 text-xs font-bold">
-              {errorMessage}
+          {displayedError && (
+            <div className="p-3.5 rounded-12 bg-red-500/20 border border-red-500/40 text-red-200 text-xs font-bold leading-relaxed animate-in fade-in">
+              {displayedError}
             </div>
           )}
 
@@ -216,11 +249,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="w-full py-3.5 rounded-12 font-black text-sm text-white bg-[#753b47] hover:bg-[#854351] transition-all shadow-lg flex items-center justify-center gap-2"
+                disabled={isLoading}
+                className="w-full py-3.5 rounded-12 font-black text-sm text-white bg-[#753b47] hover:bg-[#854351] transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? (
-                  <span>جاري تسجيل الدخول...</span>
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>جاري تسجيل الدخول والتحقق من الجلسة...</span>
+                  </div>
                 ) : (
                   <>
                     <span>تسجيل الدخول</span>
@@ -331,11 +367,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="w-full py-3.5 rounded-12 font-black text-sm text-white bg-[#753b47] hover:bg-[#854351] transition-all shadow-lg flex items-center justify-center gap-2"
+                disabled={isLoading}
+                className="w-full py-3.5 rounded-12 font-black text-sm text-white bg-[#753b47] hover:bg-[#854351] transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? (
-                  <span>جاري إنشاء الحساب...</span>
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>جاري إنشاء الحساب وتوثيق الجهاز...</span>
+                  </div>
                 ) : (
                   <>
                     <GraduationCap className="w-4 h-4" />

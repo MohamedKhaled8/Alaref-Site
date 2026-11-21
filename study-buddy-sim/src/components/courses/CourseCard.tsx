@@ -1,6 +1,8 @@
 import React from "react";
-import { Clock, Play } from "lucide-react";
+import { Clock, Play, CheckCircle } from "lucide-react";
 import { CourseItem, teacherProfile } from "../../data/mockData";
+import { useEnrollmentStore } from "../../stores/useEnrollmentStore";
+import { useAuthStore } from "../../stores/useAuthStore";
 
 interface CourseCardProps {
   course: CourseItem;
@@ -13,6 +15,9 @@ export const CourseCard: React.FC<CourseCardProps> = ({
   onOpenDetails,
   onEnrollNow,
 }) => {
+  const isEnrolledInStore = useEnrollmentStore((state) => state.isCourseEnrolled(course.id));
+  const isEnrolledInAuth = useAuthStore((state) => state.isEnrolled(course.id));
+  const isEnrolled = isEnrolledInStore || isEnrolledInAuth;
   return (
     <div className="group select-none flex flex-col text-right rounded-24 bg-white dark:bg-[#161926] hover:bg-orange-50/20 dark:hover:bg-[#1a1e2d] border border-gray-100 dark:border-white/10 hover:border-[#ed6140] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 font-almarai">
       
@@ -83,7 +88,11 @@ export const CourseCard: React.FC<CourseCardProps> = ({
             <span className="text-gray-500 dark:text-white/60 text-[11px]">
               {course.lecturesCount} محاضرات
             </span>
-            {course.isFree ? (
+            {isEnrolled ? (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 dark:bg-emerald-500/15 border border-emerald-300 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400">
+                مُشترك
+              </span>
+            ) : course.isFree ? (
               <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 dark:bg-emerald-500/15 border border-emerald-300 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400">
                 مجاناً
               </span>
@@ -104,12 +113,22 @@ export const CourseCard: React.FC<CourseCardProps> = ({
             عرض التفاصيل والمنهج
           </button>
 
-          <button
-            onClick={() => onEnrollNow(course)}
-            className="w-full py-2.5 rounded-12 text-xs font-black text-white bg-[#ed6140] hover:bg-[#d94f30] shadow-md shadow-[#ed6140]/25 transition-all text-center cursor-pointer active:scale-98"
-          >
-            {course.isFree ? "ابدأ المشاهدة الآن" : "الإشتراك في الكورس !"}
-          </button>
+          {isEnrolled ? (
+            <button
+              onClick={() => onOpenDetails(course)}
+              className="w-full py-2.5 rounded-12 text-xs font-black text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/25 transition-all text-center cursor-pointer active:scale-98 flex items-center justify-center gap-1.5"
+            >
+              <CheckCircle className="w-3.5 h-3.5" />
+              <span>مُشترك بالفعل • ابدأ التعلم</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => onEnrollNow(course)}
+              className="w-full py-2.5 rounded-12 text-xs font-black text-white bg-[#ed6140] hover:bg-[#d94f30] shadow-md shadow-[#ed6140]/25 transition-all text-center cursor-pointer active:scale-98"
+            >
+              {course.isFree ? "ابدأ المشاهدة الآن" : "الإشتراك في الكورس !"}
+            </button>
+          )}
         </div>
 
       </div>

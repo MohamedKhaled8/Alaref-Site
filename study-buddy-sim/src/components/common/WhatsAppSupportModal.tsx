@@ -16,7 +16,7 @@ export const WhatsAppSupportModal: React.FC<WhatsAppSupportModalProps> = ({
   if (!isOpen) return null;
 
   const whatsappUrl = `https://wa.me/${teacherProfile.whatsappSupport}?text=${encodeURIComponent(
-    `السلام عليكم مستر محمد العميد، أود الاستفسار بخصوص: ${reason}`
+    `السلام عليكم ${teacherProfile.name}، أود الاستفسار بخصوص: ${reason}`
   )}`;
 
   return (
@@ -31,7 +31,7 @@ export const WhatsAppSupportModal: React.FC<WhatsAppSupportModalProps> = ({
             </div>
             <div>
               <h3 className="font-bold text-base sm:text-lg text-white">
-                فريق دعم مستر محمد العميد
+                فريق دعم {teacherProfile.name}
               </h3>
               <p className="text-xs text-white/50">خدمة الطلاب وأولياء الأمور</p>
             </div>
@@ -48,7 +48,7 @@ export const WhatsAppSupportModal: React.FC<WhatsAppSupportModalProps> = ({
         {/* Message */}
         <div className="space-y-3">
           <p className="text-sm text-white/80 leading-relaxed">
-            مرحباً بك في منصة محمد العميد التعليمية! إذا كان لديك أي استفسار بخصوص حجز الكورسات، استلام المذكرات، أو تفعيل حسابك، فريق الدعم الفني جاهز لمساعدتك في أسرع وقت.
+            مرحباً بك في منصة {teacherProfile.name} التعليمية! إذا كان لديك أي استفسار بخصوص حجز الكورسات، استلام المذكرات، أو تفعيل حسابك، فريق الدعم الفني جاهز لمساعدتك في أسرع وقت.
           </p>
 
           <div className="p-3.5 rounded-16 bg-white/5 border border-white/10 text-xs text-white/60 space-y-1">
@@ -65,7 +65,7 @@ export const WhatsAppSupportModal: React.FC<WhatsAppSupportModalProps> = ({
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full py-3.5 px-4 rounded-12 font-black text-sm text-white bg-[#25D366] hover:bg-[#20ba5a] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#25D366]/20"
+            className="w-full py-3.5 px-4 rounded-12 font-black text-sm text-white bg-[#25D366] hover:bg-[#20ba5a] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#25D366]/20 cursor-pointer"
           >
             <MessageSquare className="w-4 h-4" />
             <span>فتح محادثة واتساب الآن</span>
@@ -74,7 +74,7 @@ export const WhatsAppSupportModal: React.FC<WhatsAppSupportModalProps> = ({
 
           <button
             onClick={onClose}
-            className="w-full py-2.5 rounded-12 border border-white/10 text-xs font-bold hover:bg-white/5 text-white/70 transition-colors"
+            className="w-full py-2.5 rounded-12 border border-white/10 text-xs font-bold hover:bg-white/5 text-white/70 transition-colors cursor-pointer"
           >
             الرجوع إلى المنصة
           </button>

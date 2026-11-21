@@ -15,8 +15,8 @@ export const AmrArefCalligraphyLogo: React.FC<LogoProps> = ({
 }) => {
   // Sizing styles for optimal visual proportion and responsiveness
   const sizeClasses = {
-    sm: "h-9 sm:h-11 w-auto max-w-[210px] sm:max-w-[250px]",
-    md: "h-12 sm:h-15 w-auto max-w-[280px] sm:max-w-[340px]",
+    sm: "h-8 sm:h-10 w-auto max-w-[180px] sm:max-w-[220px]",
+    md: "h-9 sm:h-11 lg:h-12 w-auto max-w-[190px] sm:max-w-[230px] lg:max-w-[250px]",
     lg: "w-full max-w-[290px] sm:max-w-[390px] lg:max-w-[440px] h-auto",
     xl: "w-full max-w-[360px] sm:max-w-[480px] lg:max-w-[560px] h-auto",
   };

@@ -11,9 +11,15 @@ import { CourseDetailsModal } from "./components/courses/CourseDetailsModal";
 import { AuthModal } from "./components/auth/AuthModal";
 import { WhatsAppSupportModal } from "./components/common/WhatsAppSupportModal";
 import { LeaderboardModal } from "./components/leaderboard/LeaderboardModal";
+import { CheckoutModal } from "./components/payment/CheckoutModal";
+import { PaymentSuccessModal } from "./components/payment/PaymentSuccessModal";
+import { PurchaseHistoryModal } from "./components/payment/PurchaseHistoryModal";
 import { CourseItem } from "./data/mockData";
 import { Sparkles, X } from "lucide-react";
 import { useLenisScroll } from "./hooks/useLenisScroll";
+import { useAuthStore } from "./stores/useAuthStore";
+import { useEnrollmentStore } from "./stores/useEnrollmentStore";
+import { OrderInvoice } from "./types/payment";
 
 export default function App() {
   const lenisRef = useLenisScroll();
@@ -28,10 +34,21 @@ export default function App() {
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
   const [whatsappReason, setWhatsappReason] = useState("استفسار عام عن منصة أستاذي عمرو عارف");
   const [leaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
+  const [checkoutCourse, setCheckoutCourse] = useState<CourseItem | null>(null);
+  const [paymentSuccessInvoice, setPaymentSuccessInvoice] = useState<OrderInvoice | null>(null);
+  const [purchaseHistoryModalOpen, setPurchaseHistoryModalOpen] = useState(false);
 
   // Notification Toast state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [loggedInStudent, setLoggedInStudent] = useState<string | null>(null);
+
+  // Auth Store
+  const { user, isAuthenticated, isEnrolled, initialize: initAuth } = useAuthStore();
+  const loggedInStudent = user?.fullName || null;
+
+  // Initialize Auth state on mount
+  useEffect(() => {
+    initAuth();
+  }, [initAuth]);
 
   // Initialize theme from localStorage
   useEffect(() => {
@@ -73,13 +90,28 @@ export default function App() {
 
   // Pause smooth scrolling when modals are active
   useEffect(() => {
-    const isModalActive = authModalOpen || whatsappModalOpen || leaderboardModalOpen || !!selectedCourseForDetails;
+    const isModalActive =
+      authModalOpen ||
+      whatsappModalOpen ||
+      leaderboardModalOpen ||
+      checkoutCourse !== null ||
+      paymentSuccessInvoice !== null ||
+      purchaseHistoryModalOpen ||
+      !!selectedCourseForDetails;
     if (isModalActive) {
       lenisRef.current?.stop();
     } else {
       lenisRef.current?.start();
     }
-  }, [authModalOpen, whatsappModalOpen, leaderboardModalOpen, selectedCourseForDetails]);
+  }, [
+    authModalOpen,
+    whatsappModalOpen,
+    leaderboardModalOpen,
+    checkoutCourse,
+    paymentSuccessInvoice,
+    purchaseHistoryModalOpen,
+    selectedCourseForDetails,
+  ]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -94,23 +126,38 @@ export default function App() {
   };
 
   const handleAuthSuccess = (name: string) => {
-    setLoggedInStudent(name);
     showToast(`مرحباً بك يا ${name} في منصة أستاذي عمرو عارف! تم تسجيل الدخول بنجاح.`);
   };
 
   const handleEnrollCourse = (course: CourseItem) => {
+    const isAlreadyEnrolled =
+      isEnrolled(course.id) ||
+      useEnrollmentStore.getState().isCourseEnrolled(course.id);
+
     if (course.isFree) {
+      if (user) {
+        useEnrollmentStore.getState().enrollFreeCourse(course.id, user, course);
+      }
       setSelectedCourseForDetails(course);
       showToast(`تم فتح المحتوى المجاني لكورس: ${course.title}`);
     } else {
-      if (!loggedInStudent) {
+      if (!isAuthenticated) {
         handleOpenAuth("login");
         showToast("يرجى تسجيل الدخول أو إنشاء حساب للاشتراك في الكورس.");
+      } else if (isAlreadyEnrolled) {
+        setSelectedCourseForDetails(course);
+        showToast(`أنت مشترك بالفعل في كورس: ${course.title}. يمكنك متابعة المشاهدة فوراً.`);
       } else {
-        setWhatsappReason(`تفعيل كود اشتراك كورس: ${course.title} (سعر: ${course.price} ج.م)`);
-        setWhatsappModalOpen(true);
+        // Automated checkout modal (replacing WhatsApp redirect)
+        setCheckoutCourse(course);
       }
     }
+  };
+
+  const handlePaymentSuccess = (invoice: OrderInvoice) => {
+    setCheckoutCourse(null);
+    setPaymentSuccessInvoice(invoice);
+    showToast(`تم تأكيد الاشتراك بنجاح في كورس: ${invoice.courseTitle}`);
   };
 
   const handleNavigate = (sectionId: string) => {
@@ -226,6 +273,7 @@ export default function App() {
         course={selectedCourseForDetails}
         onClose={() => setSelectedCourseForDetails(null)}
         onEnrollNow={handleEnrollCourse}
+        onRequireAuth={() => handleOpenAuth("login")}
         onOpenWhatsApp={() => {
           setWhatsappReason(`استفسار عن كورس: ${selectedCourseForDetails?.title}`);
           setWhatsappModalOpen(true);
@@ -248,6 +296,40 @@ export default function App() {
       <LeaderboardModal
         isOpen={leaderboardModalOpen}
         onClose={() => setLeaderboardModalOpen(false)}
+      />
+
+      {/* Checkout Modal */}
+      <CheckoutModal
+        isOpen={!!checkoutCourse}
+        onClose={() => setCheckoutCourse(null)}
+        course={checkoutCourse}
+        user={user}
+        onSuccess={handlePaymentSuccess}
+        onRequireAuth={() => handleOpenAuth("login")}
+      />
+
+      {/* Payment Success Celebration Modal */}
+      <PaymentSuccessModal
+        isOpen={!!paymentSuccessInvoice}
+        onClose={() => setPaymentSuccessInvoice(null)}
+        invoice={paymentSuccessInvoice}
+        onStartLearning={() => {
+          const inv = paymentSuccessInvoice;
+          setPaymentSuccessInvoice(null);
+          if (inv && checkoutCourse) {
+            setSelectedCourseForDetails(checkoutCourse);
+          }
+        }}
+      />
+
+      {/* Purchase History Modal */}
+      <PurchaseHistoryModal
+        isOpen={purchaseHistoryModalOpen}
+        onClose={() => setPurchaseHistoryModalOpen(false)}
+        onOpenCourse={(courseId) => {
+          setPurchaseHistoryModalOpen(false);
+          handleNavigate("courses");
+        }}
       />
 
     </div>

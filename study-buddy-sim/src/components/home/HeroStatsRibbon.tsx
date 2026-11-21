@@ -5,10 +5,10 @@ export const HeroStatsRibbon: React.FC = () => {
   return (
     <section className="py-12 sm:py-20 max-w-7xl mx-auto px-4 sm:px-8 select-none font-ibm relative overflow-hidden">
       <div className="flex flex-col lg:flex-row gap-10 lg:gap-14 items-center justify-between">
-        
+
         {/* Right Block (Quote): Waleed-Mohsen Signature Teacher Philosophy */}
         <div className="basis-full lg:basis-1/2 text-right relative p-2 sm:p-6">
-          
+
           <p className="text-[#ed6140] text-base sm:text-lg mb-3 font-medium font-ibm">
             – أستاذك عمرو عارف
           </p>
@@ -27,21 +27,14 @@ export const HeroStatsRibbon: React.FC = () => {
             </p>
           </div>
 
-          {/* Authentic Outlined Arabic Calligraphy Watermark (Exact Waleed Mohsen textDecore.png) */}
-          <img
-            src="/assets/waleed_text_decore.png"
-            alt="أستاذي في اللغة العربية"
-            className="absolute -z-0 -bottom-6 right-0 sm:right-4 w-[280px] sm:w-[460px] max-w-none opacity-85 dark:opacity-40 pointer-events-none select-none"
-          />
-
         </div>
 
         {/* Left Blocks: Waleed-Mohsen Exact Dual Bento Cards & Pills (Image 3) */}
         <div className="basis-full lg:basis-1/2 flex flex-col sm:flex-row gap-4 items-center justify-center w-full">
-          
+
           {/* Column 1: Top Pill + Big Card 400K */}
           <div className="flex flex-col space-y-4 w-full sm:w-[300px] md:w-[340px]">
-            
+
             {/* Top Pill: ما النجاح إلا لحظة */}
             <div className="bg-gradient-to-r from-orange-200/40 to-yellow-200/40 dark:from-orange-500/10 dark:to-yellow-500/10 rounded-3xl p-5 text-center flex items-center justify-center h-[80px] border border-orange-200/30 dark:border-white/5">
               <p className="text-xl sm:text-2xl font-ibm font-medium text-gray-800 dark:text-gray-200">
@@ -73,8 +66,8 @@ export const HeroStatsRibbon: React.FC = () => {
               {/* Giant Faint Books SVG Watermark */}
               <div className="absolute -bottom-6 -left-6 opacity-10 pointer-events-none">
                 <svg width="160" height="160" viewBox="0 0 24 24" fill="currentColor" className="text-amber-950 dark:text-white">
-                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
                 </svg>
               </div>
             </motion.div>
@@ -83,7 +76,7 @@ export const HeroStatsRibbon: React.FC = () => {
 
           {/* Column 2: Big Card 360K + Bottom Pill */}
           <div className="flex flex-col space-y-4 w-full sm:w-[300px] md:w-[340px]">
-            
+
             {/* Big Yellow Card: +360K with YouTube / Student icon */}
             <motion.div
               whileHover={{ y: -4, scale: 1.02 }}
@@ -108,7 +101,7 @@ export const HeroStatsRibbon: React.FC = () => {
               {/* Giant Faint Play SVG Watermark */}
               <div className="absolute -bottom-6 -left-6 opacity-10 pointer-events-none">
                 <svg width="160" height="160" viewBox="0 0 24 24" fill="currentColor" className="text-amber-950 dark:text-white">
-                  <polygon points="5 3 19 12 5 21 5 3"/>
+                  <polygon points="5 3 19 12 5 21 5 3" />
                 </svg>
               </div>
             </motion.div>

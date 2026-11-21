@@ -16,15 +16,23 @@ import {
   Flag,
   Calendar,
   Layers,
-  GraduationCap
+  GraduationCap,
+  Sparkles
 } from "lucide-react";
-import { CourseItem, teacherProfile } from "../../data/mockData";
+import { CourseItem, LessonItem, teacherProfile } from "../../data/mockData";
+import { useAuthStore } from "../../stores/useAuthStore";
+import { useEnrollmentStore } from "../../stores/useEnrollmentStore";
+import { LessonRoomModal } from "../lessons/LessonRoomModal";
+import { ExamPlayerModal } from "../exams/ExamPlayerModal";
+import { SummaryViewerModal } from "../summaries/SummaryViewerModal";
+import { getSummaryByLessonId } from "../../data/mockSummaries";
 
 interface CourseDetailsModalProps {
   course: CourseItem | null;
   onClose: () => void;
   onEnrollNow: (course: CourseItem) => void;
   onOpenWhatsApp: () => void;
+  onRequireAuth?: () => void;
 }
 
 export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
@@ -32,15 +40,51 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
   onClose,
   onEnrollNow,
   onOpenWhatsApp,
+  onRequireAuth,
 }) => {
   const [activeTab, setActiveTab] = useState<"about" | "content" | "comments" | "reviews">("content");
   const [expandedUnitId, setExpandedUnitId] = useState<string>("chapter-194");
   const [previewLessonTitle, setPreviewLessonTitle] = useState<string | null>(null);
+  const [isLessonRoomOpen, setIsLessonRoomOpen] = useState<boolean>(false);
+  const [selectedLessonId, setSelectedLessonId] = useState<string | undefined>(undefined);
+  const [isDirectExamOpen, setIsDirectExamOpen] = useState<boolean>(false);
+  const [selectedExamId, setSelectedExamId] = useState<string>("quiz-62");
+  const [isDirectSummaryOpen, setIsDirectSummaryOpen] = useState<boolean>(false);
+  const [selectedSummaryLessonId, setSelectedSummaryLessonId] = useState<string>("les-200");
+
+  const { isEnrolled, user } = useAuthStore();
+  const isEnrolledInStore = useEnrollmentStore((state) => course ? state.isCourseEnrolled(course.id) : false);
+  const enrolled = course ? isEnrolled(course.id) || isEnrolledInStore || user?.role === "admin" : false;
 
   if (!course) return null;
 
   const toggleUnit = (unitId: string) => {
     setExpandedUnitId(expandedUnitId === unitId ? "" : unitId);
+  };
+
+  const handleOpenLesson = (lessonId: string) => {
+    setSelectedLessonId(lessonId);
+    setIsLessonRoomOpen(true);
+  };
+
+  const handleLessonAction = (lesson: LessonItem) => {
+    if (lesson.type === "quiz") {
+      if (!enrolled && !lesson.isFreePreview) {
+        onEnrollNow(course);
+        return;
+      }
+      setSelectedExamId(lesson.id);
+      setIsDirectExamOpen(true);
+    } else if (lesson.type === "pdf") {
+      if (!enrolled && !lesson.isFreePreview) {
+        onEnrollNow(course);
+        return;
+      }
+      setSelectedSummaryLessonId(lesson.id);
+      setIsDirectSummaryOpen(true);
+    } else {
+      handleOpenLesson(lesson.id);
+    }
   };
 
   return (
@@ -73,6 +117,14 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
                 <span>&gt;</span>
                 <span className="text-[var(--accent)] font-bold">{course.gradeName}</span>
               </div>
+
+              {/* Enrolled Access Badge */}
+              {enrolled && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-xs font-bold w-fit">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>أنت مشترك بالفعل في هذا الكورس • ابدأ المشاهدة</span>
+                </div>
+              )}
 
               {/* Title */}
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
@@ -260,16 +312,34 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
                                   <div>
                                     {lesson.isFreePreview ? (
                                       <button
-                                        onClick={() => setPreviewLessonTitle(lesson.title)}
-                                        className="px-2.5 py-1 rounded-8 text-[11px] font-bold bg-[#753b47] text-white hover:bg-[#854351] transition-all"
+                                        onClick={() => handleLessonAction(lesson)}
+                                        className="px-2.5 py-1 rounded-8 text-[11px] font-bold bg-[#753b47] text-white hover:bg-[#854351] transition-all flex items-center gap-1 cursor-pointer"
                                       >
-                                        معاينة مجانية
+                                        <Play className="w-3 h-3 fill-white" />
+                                        <span>معاينة مجانية</span>
+                                      </button>
+                                    ) : enrolled ? (
+                                      <button
+                                        onClick={() => handleLessonAction(lesson)}
+                                        className="px-2.5 py-1 rounded-8 text-[11px] font-bold bg-emerald-600/80 hover:bg-emerald-600 text-white transition-all flex items-center gap-1 cursor-pointer"
+                                      >
+                                        <Play className="w-3 h-3 fill-white" />
+                                        <span>
+                                          {lesson.type === "quiz"
+                                            ? "بدء الاختبار"
+                                            : lesson.type === "pdf"
+                                            ? "عرض المذكرة"
+                                            : "مشاهدة"}
+                                        </span>
                                       </button>
                                     ) : (
-                                      <span className="flex items-center gap-1 text-[11px] text-white/40 font-medium">
+                                      <button
+                                        onClick={() => handleLessonAction(lesson)}
+                                        className="flex items-center gap-1 text-[11px] text-white/40 hover:text-white/70 font-medium cursor-pointer transition-colors"
+                                      >
                                         <Lock className="w-3 h-3" />
-                                        مغلق
-                                      </span>
+                                        <span>مغلق</span>
+                                      </button>
                                     )}
                                   </div>
                                 </div>
@@ -343,12 +413,22 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
                   </div>
 
                   {/* Action CTA */}
-                  <button
-                    onClick={() => onEnrollNow(course)}
-                    className="w-full py-3 rounded-12 font-black text-xs sm:text-sm text-white bg-[#753b47] hover:bg-[#854351] shadow-md transition-all text-center"
-                  >
-                    الإشتراك في الكورس
-                  </button>
+                  {enrolled ? (
+                    <button
+                      onClick={() => handleOpenLesson(course.units[0]?.lessons[0]?.id || "")}
+                      className="w-full py-3 rounded-12 font-black text-xs sm:text-sm text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/30 transition-all text-center flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <Play className="w-4 h-4 fill-white" />
+                      <span>أنت مشترك بالفعل في هذا الكورس • ابدأ المشاهدة</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => onEnrollNow(course)}
+                      className="w-full py-3 rounded-12 font-black text-xs sm:text-sm text-white bg-[#753b47] hover:bg-[#854351] shadow-md transition-all text-center cursor-pointer"
+                    >
+                      الإشتراك في الكورس
+                    </button>
+                  )}
 
                   {/* Inclusions matching course_desktop_1440.png */}
                   <div className="pt-3 border-t border-white/5 space-y-2 text-xs text-white/70">
@@ -434,7 +514,7 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
                       {teacherProfile.name}
                     </h5>
                     <p className="text-xs text-[var(--accent)] font-semibold">
-                      عميد اللغة العربية
+                      أستاذ اللغة العربية
                     </p>
                   </div>
                 </div>
@@ -454,6 +534,32 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
         </div>
 
       </div>
+
+      {/* Dedicated Lesson Room Workspace Modal */}
+      <LessonRoomModal
+        isOpen={isLessonRoomOpen}
+        onClose={() => setIsLessonRoomOpen(false)}
+        course={course}
+        initialLessonId={selectedLessonId}
+        onRequireAuth={onRequireAuth}
+        onRequireEnroll={() => onEnrollNow(course)}
+      />
+
+      {/* Direct Exam Player */}
+      <ExamPlayerModal
+        isOpen={isDirectExamOpen}
+        onClose={() => setIsDirectExamOpen(false)}
+        examId={selectedExamId}
+      />
+
+      {/* Direct Summary Viewer */}
+      <SummaryViewerModal
+        isOpen={isDirectSummaryOpen}
+        onClose={() => setIsDirectSummaryOpen(false)}
+        summary={getSummaryByLessonId(selectedSummaryLessonId)}
+        courseTitle={course.title}
+        onRequireEnroll={() => onEnrollNow(course)}
+      />
     </div>
   );
 };

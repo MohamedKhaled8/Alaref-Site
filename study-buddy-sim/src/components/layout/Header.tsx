@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { 
-  ChevronDown, 
-  Menu, 
-  X, 
+import {
+  ChevronDown,
+  Menu,
+  X,
   Search,
   UserPlus,
   Trophy,
@@ -13,6 +13,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { gradeStages } from "../../data/mockData";
 import { AmrArefCalligraphyLogo } from "../common/AmrArefCalligraphyLogo";
 import { WaleedThemeToggle } from "../common/WaleedThemeToggle";
+import { useAuthStore } from "../../stores/useAuthStore";
+import { UserProfileDropdown } from "../auth/UserProfileDropdown";
 
 interface HeaderProps {
   isDark: boolean;
@@ -35,6 +37,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("home");
+  const { isAuthenticated, user, logout } = useAuthStore();
 
   const navItems = [
     { id: "home", label: "الرئيسية" },
@@ -59,48 +62,50 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 pt-3 px-3 sm:px-6 md:px-8 pointer-events-none select-none font-almarai">
-      {/* Main Sticky Navigation Bar matching Waleed Mohsen Benchmark */}
-      <div className="max-w-7xl mx-auto rounded-2xl bg-white/95 dark:bg-[#161926]/95 backdrop-blur-md shadow-xl border border-gray-100 dark:border-white/10 px-4 sm:px-6 h-18 sm:h-20 flex items-center justify-between gap-4 pointer-events-auto transition-colors duration-300">
-        
-        {/* Right Side (RTL Start): Waleed-Mohsen Master Calligraphy Brand Signature */}
-        <div 
-          onClick={() => handleNavClick("home")}
-          className="flex items-center gap-3 sm:gap-4 cursor-pointer group shrink-0"
-        >
-          {/* Authentic Calligraphy Logo with Gold Tashkeel */}
-          <AmrArefCalligraphyLogo size="md" />
+      {/* Main Sticky Navigation Bar - Sleek Glassmorphic with Subtle Border */}
+      <div className="max-w-7xl mx-auto rounded-2xl bg-white/85 dark:bg-[#121520]/85 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.35)] border border-gray-200/70 dark:border-white/10 px-3.5 sm:px-5 lg:px-6 h-18 sm:h-20 flex items-center justify-between gap-2 lg:gap-4 pointer-events-auto transition-all duration-300">
 
-          {/* Theme Switcher next to brand on desktop (matching Waleed Mohsen nav position) */}
-          <div className="hidden sm:block">
+        {/* Right Side (RTL Start): Brand Signature & Theme Controls */}
+        <div
+          onClick={() => handleNavClick("home")}
+          className="flex items-center gap-2.5 sm:gap-4 cursor-pointer group shrink-0 pr-0.5 sm:pr-2"
+        >
+          {/* Authentic Calligraphy Logo with responsive size and proper breathing room */}
+          <div className="flex items-center pl-1 sm:pl-2 shrink-0">
+            <AmrArefCalligraphyLogo size="sm" className="sm:hidden shrink-0" />
+            <AmrArefCalligraphyLogo size="md" className="hidden sm:inline-flex shrink-0" />
+          </div>
+
+          {/* Theme Switcher next to brand on desktop */}
+          <div className="hidden sm:flex items-center shrink-0">
             <WaleedThemeToggle isDark={isDark} onToggle={toggleTheme} />
           </div>
 
-          {/* Authentic Arabic Identity Badge */}
-          <div className="hidden xl:flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-[10px] font-bold text-amber-700 dark:text-amber-300">
+          {/* Authentic Arabic Identity Badge - 2xl only to preserve navbar space */}
+          <div className="hidden 2xl:flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-[10px] font-bold text-amber-700 dark:text-amber-300 shrink-0 whitespace-nowrap">
             <span>لُغَةُ الضَّادِ</span>
             <span className="text-amber-500">✦</span>
           </div>
         </div>
 
-        {/* Center: Clean Nav Links (Waleed Mohsen Style) */}
-        <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
+        {/* Center: Clean Nav Links with white-space: nowrap */}
+        <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5 shrink-0">
           {navItems.map((item) => {
             const isActive = activeTab === item.id;
             const ItemIcon = item.icon;
-            
+
             if (item.hasDropdown) {
               return (
-                <div key={item.id} className="relative">
+                <div key={item.id} className="relative shrink-0">
                   <button
                     onClick={() => setGradesDropdownOpen(!gradesDropdownOpen)}
-                    className={`px-3.5 py-2 rounded-10 text-sm font-bold transition-all flex items-center gap-1.5 cursor-pointer font-almarai ${
-                      gradesDropdownOpen || isActive 
-                        ? "text-[#ed6140] bg-orange-50 dark:bg-white/10" 
-                        : "text-gray-700 dark:text-white/80 hover:text-[#ed6140] hover:bg-gray-50 dark:hover:bg-white/5"
-                    }`}
+                    className={`px-2.5 xl:px-3.5 py-2 rounded-10 text-xs xl:text-sm font-bold transition-all flex items-center gap-1 cursor-pointer font-almarai whitespace-nowrap shrink-0 ${gradesDropdownOpen || isActive
+                      ? "text-[#ed6140] bg-orange-50 dark:bg-white/10"
+                      : "text-gray-700 dark:text-white/80 hover:text-[#ed6140] hover:bg-gray-50 dark:hover:bg-white/5"
+                      }`}
                   >
-                    <span>{item.label}</span>
-                    <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${gradesDropdownOpen ? "rotate-180 text-[#ed6140]" : ""}`} />
+                    <span className="whitespace-nowrap">{item.label}</span>
+                    <ChevronDown className={`w-3.5 h-3.5 text-gray-400 shrink-0 transition-transform duration-200 ${gradesDropdownOpen ? "rotate-180 text-[#ed6140]" : ""}`} />
                   </button>
 
                   {/* Dropdown Menu */}
@@ -113,24 +118,24 @@ export const Header: React.FC<HeaderProps> = ({
                         transition={{ duration: 0.18 }}
                         className="absolute top-full right-0 mt-2 w-64 rounded-16 bg-white dark:bg-[#1a1e2d] border border-gray-100 dark:border-white/15 shadow-2xl p-2 z-50 text-right space-y-1 font-almarai"
                       >
-                        <div className="px-3 py-1.5 text-[10px] font-extrabold text-gray-400 dark:text-white/40 tracking-wider">
+                        <div className="px-3 py-1.5 text-[10px] font-extrabold text-gray-400 dark:text-white/40 tracking-wider whitespace-nowrap">
                           اختر السنة الدراسية
                         </div>
                         {gradeStages.map((grade) => (
                           <button
                             key={grade.id}
                             onClick={() => handleGradeSelect(grade.id)}
-                            className="w-full px-3 py-2.5 rounded-10 text-xs font-bold text-right text-gray-800 dark:text-white/90 hover:bg-orange-50 dark:hover:bg-white/10 hover:text-[#ed6140] transition-colors flex items-center justify-between group cursor-pointer"
+                            className="w-full px-3 py-2.5 rounded-10 text-xs font-bold text-right text-gray-800 dark:text-white/90 hover:bg-orange-50 dark:hover:bg-white/10 hover:text-[#ed6140] transition-colors flex items-center justify-between group cursor-pointer whitespace-nowrap"
                           >
-                            <div className="flex items-center gap-2.5">
-                              <img 
-                                src={grade.badgeImage} 
-                                alt={grade.title} 
-                                className="w-6 h-6 rounded-full object-cover border border-gray-200 dark:border-white/20"
+                            <div className="flex items-center gap-2.5 shrink-0">
+                              <img
+                                src={grade.badgeImage}
+                                alt={grade.title}
+                                className="w-6 h-6 rounded-full object-cover border border-gray-200 dark:border-white/20 shrink-0"
                               />
-                              <span>{grade.title}</span>
+                              <span className="whitespace-nowrap">{grade.title}</span>
                             </div>
-                            <span className="text-[10px] text-gray-400 group-hover:text-[#ed6140] font-mono">
+                            <span className="text-[10px] text-gray-400 group-hover:text-[#ed6140] font-mono whitespace-nowrap">
                               {grade.subtitle}
                             </span>
                           </button>
@@ -146,38 +151,39 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className={`px-3.5 py-2 rounded-10 text-sm font-bold transition-all flex items-center gap-1.5 cursor-pointer font-almarai ${
+                style={isActive ? { borderRadius: "8px" } : undefined}
+                className={`px-2.5 xl:px-3.5 py-2 text-xs xl:text-sm font-bold transition-all flex items-center gap-1 cursor-pointer font-almarai whitespace-nowrap shrink-0 ${
                   isActive 
-                    ? "text-[#ed6140] bg-orange-50 dark:bg-white/10 font-black" 
+                    ? "text-[#ed6140] bg-orange-50 dark:bg-white/10 font-black rounded-[8px]" 
                     : item.isAccent
-                      ? "text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-white/5"
-                      : "text-gray-700 dark:text-white/80 hover:text-[#ed6140] hover:bg-gray-50 dark:hover:bg-white/5"
+                      ? "text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-white/5 rounded-10"
+                      : "text-gray-700 dark:text-white/80 hover:text-[#ed6140] hover:bg-gray-50 dark:hover:bg-white/5 rounded-10"
                 }`}
               >
-                {ItemIcon && <ItemIcon className="w-4 h-4 text-amber-500 shrink-0" />}
-                <span>{item.label}</span>
+                {ItemIcon && <ItemIcon className="w-3.5 h-3.5 text-amber-500 shrink-0" />}
+                <span className="whitespace-nowrap">{item.label}</span>
               </button>
             );
           })}
         </nav>
 
-        {/* Left Side (RTL End): Buttons & Search */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          
+        {/* Left Side (RTL End): Buttons & Search with white-space: nowrap */}
+        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+
           {/* Mobile Theme Toggle */}
-          <div className="sm:hidden">
+          <div className="sm:hidden flex items-center shrink-0">
             <WaleedThemeToggle isDark={isDark} onToggle={toggleTheme} />
           </div>
 
           {/* Search Trigger */}
-          <div className="relative hidden md:block">
+          <div className="relative hidden md:block shrink-0">
             <button
               onClick={() => setSearchOpen(!searchOpen)}
-              className="p-2 sm:px-3 sm:py-2 rounded-12 text-gray-600 dark:text-white/80 hover:text-[#ed6140] hover:bg-orange-50 dark:hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer text-xs font-bold font-almarai"
+              className="p-2 sm:px-2.5 sm:py-2 rounded-12 text-gray-600 dark:text-white/80 hover:text-[#ed6140] hover:bg-orange-50 dark:hover:bg-white/10 transition-colors flex items-center gap-1.5 cursor-pointer text-xs font-bold font-almarai whitespace-nowrap shrink-0"
               title="ابحث في الموقع"
             >
-              <Search className="w-4 h-4" />
-              <span>ابحث في الموقع</span>
+              <Search className="w-4 h-4 shrink-0" />
+              <span className="whitespace-nowrap hidden xl:inline">ابحث في الموقع</span>
             </button>
 
             {/* Quick Search Dropdown */}
@@ -210,27 +216,34 @@ export const Header: React.FC<HeaderProps> = ({
             </AnimatePresence>
           </div>
 
-          {/* Login Button (Outline Red) */}
-          <button
-            onClick={() => onOpenAuth("login")}
-            className="hidden sm:inline-flex px-5 py-2 rounded-12 text-xs sm:text-sm font-bold text-[#ed6140] border-2 border-[#ed6140] hover:bg-[#ed6140] hover:text-white transition-all cursor-pointer font-almarai"
-          >
-            تسجيل الدخول
-          </button>
+          {/* Auth Actions */}
+          {isAuthenticated ? (
+            <UserProfileDropdown onNavigate={handleNavClick} />
+          ) : (
+            <div className="hidden sm:flex items-center gap-1.5 sm:gap-2 shrink-0">
+              {/* Login Button (Outline Red) */}
+              <button
+                onClick={() => onOpenAuth("login")}
+                className="px-3.5 sm:px-4 py-2 rounded-12 text-xs sm:text-sm font-bold text-[#ed6140] border-2 border-[#ed6140] hover:bg-[#ed6140] hover:text-white transition-all cursor-pointer font-almarai whitespace-nowrap shrink-0"
+              >
+                تسجيل الدخول
+              </button>
 
-          {/* Register Button (Solid Red - Exact Waleed Mohsen "حساب جديد") */}
-          <button
-            onClick={() => onOpenAuth("register")}
-            className="px-5 sm:px-6 py-2 rounded-12 text-xs sm:text-sm font-black text-white bg-[#ed6140] hover:bg-[#d94f30] border-2 border-[#ed6140] shadow-md shadow-[#ed6140]/25 transition-all hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-1.5 font-almarai"
-          >
-            <UserPlus className="w-4 h-4" />
-            <span>حساب جديد</span>
-          </button>
+              {/* Register Button (Solid Red) */}
+              <button
+                onClick={() => onOpenAuth("register")}
+                className="px-3.5 sm:px-4.5 py-2 rounded-12 text-xs sm:text-sm font-black text-white bg-[#ed6140] hover:bg-[#d94f30] border-2 border-[#ed6140] shadow-sm shadow-[#ed6140]/25 transition-all hover:scale-102 active:scale-95 cursor-pointer flex items-center gap-1.5 font-almarai whitespace-nowrap shrink-0"
+              >
+                <UserPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                <span className="whitespace-nowrap">حساب جديد</span>
+              </button>
+            </div>
+          )}
 
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 rounded-10 text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+            className="lg:hidden p-2 rounded-10 text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer shrink-0"
             aria-label="القائمة الرئيسية"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -255,34 +268,55 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   key={item.id}
                   onClick={() => handleNavClick(item.id)}
-                  className="w-full px-4 py-2.5 rounded-12 text-sm font-bold text-gray-800 dark:text-white/90 hover:bg-orange-50 dark:hover:bg-white/10 hover:text-[#ed6140] transition-colors flex items-center justify-between"
+                  className="w-full px-4 py-2.5 rounded-12 text-sm font-bold text-gray-800 dark:text-white/90 hover:bg-orange-50 dark:hover:bg-white/10 hover:text-[#ed6140] transition-colors flex items-center justify-between whitespace-nowrap"
                 >
-                  <span>{item.label}</span>
-                  {ItemIcon && <ItemIcon className="w-4 h-4 text-amber-500" />}
+                  <span className="whitespace-nowrap">{item.label}</span>
+                  {ItemIcon && <ItemIcon className="w-4 h-4 text-amber-500 shrink-0" />}
                 </button>
               );
             })}
 
-            <div className="pt-3 border-t border-gray-100 dark:border-white/10 flex items-center gap-2">
-              <button
-                onClick={() => {
-                  onOpenAuth("login");
-                  setMobileMenuOpen(false);
-                }}
-                className="w-1/2 py-2.5 rounded-12 text-xs font-bold text-[#ed6140] border-2 border-[#ed6140] text-center"
-              >
-                تسجيل الدخول
-              </button>
-              <button
-                onClick={() => {
-                  onOpenAuth("register");
-                  setMobileMenuOpen(false);
-                }}
-                className="w-1/2 py-2.5 rounded-12 text-xs font-black text-white bg-[#ed6140] text-center shadow-md shadow-[#ed6140]/25"
-              >
-                حساب جديد
-              </button>
-            </div>
+            {isAuthenticated ? (
+              <div className="pt-3 border-t border-gray-100 dark:border-white/10 space-y-2">
+                <div className="flex items-center justify-between p-2.5 rounded-12 bg-gray-50 dark:bg-white/5">
+                  <div>
+                    <div className="font-bold text-xs text-gray-900 dark:text-white">{user?.fullName}</div>
+                    <div className="text-[10px] text-gray-500 dark:text-white/60">{user?.gradeName}</div>
+                  </div>
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold whitespace-nowrap">جهاز موثق ✓</span>
+                </div>
+                <button
+                  onClick={() => {
+                    logout();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full py-2.5 rounded-12 text-xs font-black text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 text-center cursor-pointer whitespace-nowrap"
+                >
+                  تسجيل الخروج
+                </button>
+              </div>
+            ) : (
+              <div className="pt-3 border-t border-gray-100 dark:border-white/10 flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    onOpenAuth("login");
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-1/2 py-2.5 rounded-12 text-xs font-bold text-[#ed6140] border-2 border-[#ed6140] text-center whitespace-nowrap"
+                >
+                  تسجيل الدخول
+                </button>
+                <button
+                  onClick={() => {
+                    onOpenAuth("register");
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-1/2 py-2.5 rounded-12 text-xs font-black text-white bg-[#ed6140] text-center shadow-md shadow-[#ed6140]/25 whitespace-nowrap"
+                >
+                  حساب جديد
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
